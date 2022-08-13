@@ -34,10 +34,7 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        Group {
-            ContentView()
-            ContentView()
-        }
+        ContentView()
     }
 }
 struct CalculationView: View {
@@ -53,7 +50,14 @@ struct CameraListView: View {
             ForEach(cameras,id: \.cameraId){
                 camera in
                 NavigationLink{
-                    CameraEditView(cameras: $cameras, name: camera.name, lenses: camera.lenses, filters: camera.filters,mKelvin: String(camera.macro.kelvin), mTint: String(camera.macro.tint), zKelvin: String(camera.zoom.kelvin), zTint: String(camera.zoom.tint))
+                    if let idx = cameras.firstIndex(where: {$0 == camera}) {
+                        CameraEditView(cameras: $cameras,cameraId: camera.cameraId, macroId: camera.macro.macroId, zoomId: camera.zoom.zoomId ,position: idx, name: camera.name, lenses: camera.lenses, filters: camera.filters,mKelvin: String(camera.macro.kelvin), mTint: String(camera.macro.tint), zKelvin: String(camera.zoom.kelvin), zTint: String(camera.zoom.tint))
+                            .onDisappear(perform: {
+                                GetCameras(){ response in
+                                    cameras = response
+                                }
+                            })
+                    }
                 } label:{
                     Text(camera.name)
                 }
@@ -68,16 +72,24 @@ struct CameraListView: View {
         .navigationBarTitle("Cameras")
         .toolbar {
             ToolbarItem{
-            NavigationLink{
-                AddCameraView(cameras: $cameras)
-            } label: {
-                Text("Add")
-            }}
+                NavigationLink{
+                    AddCameraView(cameras: $cameras)
+                        .onDisappear(perform: {
+                            GetCameras(){ response in
+                                cameras = response
+                            }
+                        })
+                } label: {
+                    Text("Add")
+                }}
         }
     }
 }
 struct CameraEditView: View {
     @Binding var cameras: [Camera]
+    @State var cameraId: Int
+    @State var macroId: Int
+    @State var zoomId: Int
     @State var position: Int
     @State var name: String
     @State var lenses: [Lense]
@@ -86,20 +98,73 @@ struct CameraEditView: View {
     @State var mTint: String
     @State var zKelvin: String
     @State var zTint:String
-    
+    @Environment(\.presentationMode) var presentationMode
     var body: some View{
         VStack{
-            NavigationLink{
-                LenseList()
-            } label: {
-                Text("Lenses")
+            HStack{
+                Text("Name:")
+                TextField("name",text: $name)
             }
-            NavigationLink{
-                FilterList()
-            }label: {
-                Text("Fiters")
+            ForEach(lenses, id: \.lenseId){ lense in
+                NavigationLink{
+                    LenseEdit()
+                } label: {
+                    Text("Lense \(lense.lenseId)")
+                }
+            }.listRowSeparatorTint(.black)
+            ForEach(filters, id: \.filterId){ filter in
+                NavigationLink{
+                    FilterEdit()
+                } label: {
+                    Text("Filter \(filter.filterId)")
+                }
+            }.listRowSeparatorTint(.black)
+            VStack{
+                Text("Macro")
+                HStack{
+                    Text("Tint:")
+                    TextField("mtint",text: $mTint)
+                }
+                HStack{
+                    Text("Kelvin:")
+                    TextField("mKelvin",text: $mKelvin)
+                }
             }
-        }
+            VStack{
+                Text("Zoom")
+                HStack{
+                    Text("Tint:")
+                    TextField("mtint",text: $zTint)
+                }
+                HStack{
+                    Text("Kelvin:")
+                    TextField("mKelvin",text: $zKelvin)
+                }
+            }
+            Spacer()
+        }.navigationBarItems(trailing: Button("Save"){
+            guard let macroKelvin: Int = Int(mKelvin) else {
+                print("Not a number")
+                return
+            }
+            guard let macroTint: Int = Int(mTint) else {
+                print("Not a number")
+                return
+            }
+            guard let zoomKelvin: Int = Int(zKelvin) else {
+                print("Not a number")
+                return
+            }
+            guard let zoomTint: Int = Int(zTint) else {
+                print("Not a number")
+                return
+            }
+            let camera = Camera(cameraId: cameraId, name: name, lenses: lenses, filters: filters, macro: Macro(macroId: macroId, kelvin: macroKelvin, tint: macroTint), zoom: Zoom(zoomId: zoomId, kelvin: zoomKelvin, tint: zoomTint))
+            UpdateCamera(camera: camera)
+            
+            presentationMode.wrappedValue.dismiss()
+        })
+        
     }
 }
 struct AddCameraView :View {
@@ -113,16 +178,47 @@ struct AddCameraView :View {
     @State var zTint:String = ""
     @Environment(\.presentationMode) var presentationMode
     var body: some View{
+        
         VStack{
-            NavigationLink{
-                LenseList()
-            } label: {
-                Text("Lenses")
+            HStack{
+                Text("Name:")
+                TextField("name",text: $name)
             }
-            NavigationLink{
-                FilterList()
-            }label: {
-                Text("Fiters")
+            ForEach(lenses, id: \.lenseId){ lense in
+                NavigationLink{
+                    LenseEdit()
+                } label: {
+                    Text("Lense \(lense.lenseId)")
+                }
+            }.listRowSeparatorTint(.black)
+            ForEach(filters, id: \.filterId){ filter in
+                NavigationLink{
+                    FilterEdit()
+                } label: {
+                    Text("Filter \(filter.filterId)")
+                }
+            }.listRowSeparatorTint(.black)
+            VStack{
+                Text("Macro")
+                HStack(alignment: .center, spacing: 10){
+                    Text("Tint:")
+                    TextField("mtint",text: $mTint)
+                }
+                HStack{
+                    Text("Kelvin:")
+                    TextField("mKelvin",text: $mKelvin)
+                }
+            }
+            VStack{
+                Text("Zoom")
+                HStack{
+                    Text("Tint:")
+                    TextField("mtint",text: $zTint)
+                }
+                HStack{
+                    Text("Kelvin:")
+                    TextField("mKelvin",text: $zKelvin)
+                }
             }
             Spacer()
         }.navigationTitle("Add Camera")
@@ -152,11 +248,7 @@ struct AddCameraView :View {
             })
     }
 }
-struct LenseList: View{
-    var body: some View{
-        Text("LenseList")
-    }
-}
+
 struct LenseAdd: View{
     var body: some View{
         Text("LenseAdd")
@@ -172,8 +264,4 @@ struct FilterEdit: View{
         Text("FilterEdit")
     }
 }
-struct FilterList: View{
-    var body: some View{
-        Text("FilterList")
-    }
-}
+

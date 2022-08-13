@@ -7,7 +7,11 @@
 
 import Foundation
 
-struct Camera: Codable {
+struct Camera: Codable, Equatable {
+    static func == (lhs: Camera, rhs: Camera) -> Bool {
+        return  lhs.cameraId == rhs.cameraId && lhs.name == rhs.name
+    }
+    
     let cameraId: Int
     let name: String
     let lenses: [Lense]

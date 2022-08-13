@@ -38,7 +38,7 @@ func AddCamera(camera: Camera){
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "content-type")
     request.httpBody = try? encoder.encode(camera)
-    _ = URLSession.shared.dataTask(with: request){ data, _, error in
+    let task = URLSession.shared.dataTask(with: request){ data, _, error in
         guard let data = data, error == nil else {
             return
         }
@@ -49,6 +49,7 @@ func AddCamera(camera: Camera){
             print(error)
         }
     }
+    task.resume()
 }
 func DeleteCamera(id: Int){
     guard let url = URL(string:"http://localhost:8080/cameras/\(id)") else {
@@ -57,7 +58,7 @@ func DeleteCamera(id: Int){
     var request = URLRequest(url:url)
     request.httpMethod = "DELETE"
     request.setValue("application/json", forHTTPHeaderField: "content-type")
-    _ = URLSession.shared.dataTask(with: request){ data, _, error in
+    let task = URLSession.shared.dataTask(with: request){ data, _, error in
         guard let data = data, error == nil else {
             return
         }
@@ -68,6 +69,7 @@ func DeleteCamera(id: Int){
             print(error)
         }
     }
+    task.resume()
     
 }
 func UpdateCamera(camera: Camera){
@@ -78,16 +80,15 @@ func UpdateCamera(camera: Camera){
     var request = URLRequest(url:url)
     request.httpMethod = "PUT"
     request.setValue("application/json", forHTTPHeaderField: "content-type")
-    request.httpBody = try? encoder.encode(camera)
-    _ = URLSession.shared.dataTask(with: request){ data, _, error in
-        guard let data = data, error == nil else {
+    let body = try? encoder.encode(camera)
+    print(body)
+    request.httpBody = body
+    
+    let task = URLSession.shared.dataTask(with: request){ _, _, error in
+        guard error == nil else {
+            print(error)
             return
         }
-        do{
-            let response = try JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed)
-            print(response)
-        }catch{
-            print(error)
-        }
     }
+    task.resume()
 }
