@@ -101,20 +101,32 @@ struct CameraEditView: View {
                 Text("Name:")
                 TextField("name",text: $name)
             }
-            ForEach(lenses, id: \.lenseId){ lense in
-                NavigationLink{
-                    LenseEdit(lenses: $lenses, lense: lense, tint: String(lense.tint), kelvin: String(lense.kelvin))
-                } label: {
-                    Text("Lense \(lense.lenseId)")
-                }
-            }.listRowSeparatorTint(.black)
-            ForEach(filters, id: \.filterId){ filter in
-                NavigationLink{
-                    FilterEdit(filters: $filters, filter: filter, tint: String(filter.tint), kelvin: String(filter.kelvin), name: "")
-                } label: {
-                    Text("Filter \(filter.filterId)")
-                }
-            }.listRowSeparatorTint(.black)
+            NavigationLink{
+                LenseAdd(lenses: $lenses)
+            } label: {
+                Text("Add Lense")
+            }
+            List{
+                ForEach(lenses, id: \.lenseId){ lense in
+                    NavigationLink{
+                        LenseEdit(lenses: $lenses, lense: lense, tint: String(lense.tint), kelvin: String(lense.kelvin), name: lense.name)
+                    } label: {
+                        Text("Lense \(lense.name)")
+                    }
+                }}.listRowSeparatorTint(.black)
+            NavigationLink{
+                FilterAdd(filters: $filters)
+            } label: {
+                Text("Add Filter")
+            }
+            List{
+                ForEach(filters, id: \.filterId){ filter in
+                    NavigationLink{
+                        FilterEdit(filters: $filters, filter: filter, tint: String(filter.tint), kelvin: String(filter.kelvin), name: filter.name)
+                    } label: {
+                        Text("Filter \(filter.name)")
+                    }
+                }}.listRowSeparatorTint(.black)
             VStack{
                 Text("Macro")
                 HStack{
@@ -179,20 +191,33 @@ struct AddCameraView :View {
                 Text("Name:")
                 TextField("name",text: $name)
             }
-            ForEach(lenses, id: \.lenseId){ lense in
-                NavigationLink{
-                    LenseEdit(lenses: $lenses, lense: lense, tint: String(lense.tint), kelvin: String(lense.kelvin))
-                } label: {
-                    Text("Lense \(lense.lenseId)")
-                }
-            }.listRowSeparatorTint(.black)
-            ForEach(filters, id: \.filterId){ filter in
-                NavigationLink{
-                    FilterEdit(filters: $filters, filter: filter, tint: String(filter.tint), kelvin: String(filter.kelvin), name: "")
-                } label: {
-                    Text("Filter \(filter.filterId)")
-                }
-            }.listRowSeparatorTint(.black)
+            
+            NavigationLink{
+                LenseAdd(lenses: $lenses)
+            } label: {
+                Text("Add Lense")
+            }
+            List{
+                ForEach(lenses, id: \.lenseId){ lense in
+                    NavigationLink{
+                        LenseEdit(lenses: $lenses, lense: lense, tint: String(lense.tint), kelvin: String(lense.kelvin),name: lense.name)
+                    } label: {
+                        Text("Lense \(lense.name)")
+                    }
+                }}.listRowSeparatorTint(.black)
+            NavigationLink{
+                FilterAdd(filters: $filters)
+            } label: {
+                Text("Add Filter")
+            }
+            List{
+                ForEach(filters, id: \.filterId){ filter in
+                    NavigationLink{
+                        FilterEdit(filters: $filters, filter: filter, tint: String(filter.tint), kelvin: String(filter.kelvin), name: filter.name)
+                    } label: {
+                        Text("Filter \(filter.name)")
+                    }
+                }}.listRowSeparatorTint(.black)
             VStack{
                 Text("Macro")
                 HStack(alignment: .center, spacing: 10){
@@ -248,9 +273,14 @@ struct LenseAdd: View{
     @Binding var lenses:[Lense]
     @State var tint: String = "0"
     @State var kelvin: String = "0"
+    @State var name: String = ""
     @Environment(\.presentationMode) var presentationMode
     var body: some View{
         VStack{
+            HStack{
+                Text("Name:")
+                TextField("name",text: $name)
+            }
             HStack{
                 Text("Tint:")
                 TextField("tint",text: $tint)
@@ -259,7 +289,7 @@ struct LenseAdd: View{
                 Text("Kelvin:")
                 TextField("Kelvin",text: $kelvin)
             }
-            
+            Spacer()
         }
     }
 }
@@ -268,9 +298,14 @@ struct LenseEdit: View{
     @State var lense: Lense
     @State var tint: String
     @State var kelvin: String
+    @State var name: String
     @Environment(\.presentationMode) var presentationMode
     var body: some View{
         VStack{
+            HStack{
+                Text("Name:")
+                TextField("name",text: $name)
+            }
             HStack{
                 Text("Tint:")
                 TextField("tint",text: $tint)
@@ -279,6 +314,7 @@ struct LenseEdit: View{
                 Text("Kelvin:")
                 TextField("Kelvin",text: $kelvin)
             }
+            Spacer()
         }
     }
 }
@@ -287,10 +323,14 @@ struct FilterEdit: View{
     @State var filter: Filter
     @State var tint: String
     @State var kelvin: String
-    @State var name: String = ""
+    @State var name: String
     @Environment(\.presentationMode) var presentationMode
     var body: some View{
         VStack{
+            HStack{
+                Text("Name:")
+                TextField("name",text: $name)
+            }
             HStack{
                 Text("Tint:")
                 TextField("tint",text: $tint)
@@ -299,6 +339,7 @@ struct FilterEdit: View{
                 Text("Kelvin:")
                 TextField("Kelvin",text: $kelvin)
             }
+            Spacer()
         }.navigationTitle("Edit Filter")
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading:  Button("Cancel"){
@@ -331,6 +372,10 @@ struct FilterAdd: View{
     var body: some View{
         VStack{
             HStack{
+                Text("Name:")
+                TextField("name",text: $name)
+            }
+            HStack{
                 Text("Tint:")
                 TextField("tint",text: $tint)
             }
@@ -338,6 +383,7 @@ struct FilterAdd: View{
                 Text("Kelvin:")
                 TextField("Kelvin",text: $kelvin)
             }
+            Spacer()
         }.navigationTitle("Add Filter")
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading:  Button("Cancel"){
