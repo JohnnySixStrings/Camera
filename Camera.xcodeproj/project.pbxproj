@@ -14,6 +14,8 @@
 		44A002DC2898AA0300F04EE3 /* CameraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A002DB2898AA0300F04EE3 /* CameraTests.swift */; };
 		44A002E62898AA0300F04EE3 /* CameraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A002E52898AA0300F04EE3 /* CameraUITests.swift */; };
 		44A002E82898AA0300F04EE3 /* CameraUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A002E72898AA0300F04EE3 /* CameraUITestsLaunchTests.swift */; };
+		44A002F52898AB1600F04EE3 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A002F42898AB1600F04EE3 /* Camera.swift */; };
+		44A002F7289F08DA00F04EE3 /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A002F6289F08DA00F04EE3 /* CameraService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +46,8 @@
 		44A002E12898AA0300F04EE3 /* CameraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44A002E52898AA0300F04EE3 /* CameraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraUITests.swift; sourceTree = "<group>"; };
 		44A002E72898AA0300F04EE3 /* CameraUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		44A002F42898AB1600F04EE3 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		44A002F6289F08DA00F04EE3 /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +102,8 @@
 				44A002CC2898AA0000F04EE3 /* ContentView.swift */,
 				44A002CE2898AA0200F04EE3 /* Assets.xcassets */,
 				44A002D02898AA0200F04EE3 /* Preview Content */,
+				44A002F42898AB1600F04EE3 /* Camera.swift */,
+				44A002F6289F08DA00F04EE3 /* CameraService.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -257,8 +263,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44A002F7289F08DA00F04EE3 /* CameraService.swift in Sources */,
 				44A002CD2898AA0000F04EE3 /* ContentView.swift in Sources */,
 				44A002CB2898AA0000F04EE3 /* CameraApp.swift in Sources */,
+				44A002F52898AB1600F04EE3 /* Camera.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
