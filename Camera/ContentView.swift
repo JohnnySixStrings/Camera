@@ -50,14 +50,12 @@ struct CameraListView: View {
             ForEach(cameras,id: \.cameraId){
                 camera in
                 NavigationLink{
-                    if let idx = cameras.firstIndex(where: {$0 == camera}) {
-                        CameraEditView(cameras: $cameras,cameraId: camera.cameraId, macroId: camera.macro.macroId, zoomId: camera.zoom.zoomId ,position: idx, name: camera.name, lenses: camera.lenses, filters: camera.filters,mKelvin: String(camera.macro.kelvin), mTint: String(camera.macro.tint), zKelvin: String(camera.zoom.kelvin), zTint: String(camera.zoom.tint))
-                            .onDisappear(perform: {
-                                GetCameras(){ response in
-                                    cameras = response
-                                }
-                            })
-                    }
+                    CameraEditView(cameraId: camera.cameraId, macroId: camera.macro.macroId, zoomId: camera.zoom.zoomId, name: camera.name, lenses: camera.lenses, filters: camera.filters,mKelvin: String(camera.macro.kelvin), mTint: String(camera.macro.tint), zKelvin: String(camera.zoom.kelvin), zTint: String(camera.zoom.tint))
+                        .onDisappear(perform: {
+                            GetCameras(){ response in
+                                cameras = response
+                            }
+                        })
                 } label:{
                     Text(camera.name)
                 }
@@ -73,7 +71,7 @@ struct CameraListView: View {
         .toolbar {
             ToolbarItem{
                 NavigationLink{
-                    AddCameraView(cameras: $cameras)
+                    AddCameraView()
                         .onDisappear(perform: {
                             GetCameras(){ response in
                                 cameras = response
@@ -86,11 +84,9 @@ struct CameraListView: View {
     }
 }
 struct CameraEditView: View {
-    @Binding var cameras: [Camera]
     @State var cameraId: Int
     @State var macroId: Int
     @State var zoomId: Int
-    @State var position: Int
     @State var name: String
     @State var lenses: [Lense]
     @State var filters: [Filter]
@@ -107,14 +103,14 @@ struct CameraEditView: View {
             }
             ForEach(lenses, id: \.lenseId){ lense in
                 NavigationLink{
-                    LenseEdit()
+                    LenseEdit(lenses: $lenses, lense: lense, tint: String(lense.tint), kelvin: String(lense.kelvin))
                 } label: {
                     Text("Lense \(lense.lenseId)")
                 }
             }.listRowSeparatorTint(.black)
             ForEach(filters, id: \.filterId){ filter in
                 NavigationLink{
-                    FilterEdit()
+                    FilterEdit(filters: $filters, filter: filter, tint: String(filter.tint), kelvin: String(filter.kelvin), name: "")
                 } label: {
                     Text("Filter \(filter.filterId)")
                 }
@@ -168,14 +164,13 @@ struct CameraEditView: View {
     }
 }
 struct AddCameraView :View {
-    @Binding var cameras: [Camera]
     @State var name : String = ""
     @State var lenses: [Lense] = []
     @State var filters: [Filter] = []
-    @State var mKelvin: String = ""
-    @State var mTint: String = ""
-    @State var zKelvin: String = ""
-    @State var zTint:String = ""
+    @State var mKelvin: String = "0"
+    @State var mTint: String = "0"
+    @State var zKelvin: String = "0"
+    @State var zTint:String = "0"
     @Environment(\.presentationMode) var presentationMode
     var body: some View{
         
@@ -186,14 +181,14 @@ struct AddCameraView :View {
             }
             ForEach(lenses, id: \.lenseId){ lense in
                 NavigationLink{
-                    LenseEdit()
+                    LenseEdit(lenses: $lenses, lense: lense, tint: String(lense.tint), kelvin: String(lense.kelvin))
                 } label: {
                     Text("Lense \(lense.lenseId)")
                 }
             }.listRowSeparatorTint(.black)
             ForEach(filters, id: \.filterId){ filter in
                 NavigationLink{
-                    FilterEdit()
+                    FilterEdit(filters: $filters, filter: filter, tint: String(filter.tint), kelvin: String(filter.kelvin), name: "")
                 } label: {
                     Text("Filter \(filter.filterId)")
                 }
@@ -250,18 +245,115 @@ struct AddCameraView :View {
 }
 
 struct LenseAdd: View{
+    @Binding var lenses:[Lense]
+    @State var tint: String = "0"
+    @State var kelvin: String = "0"
+    @Environment(\.presentationMode) var presentationMode
     var body: some View{
-        Text("LenseAdd")
+        VStack{
+            HStack{
+                Text("Tint:")
+                TextField("tint",text: $tint)
+            }
+            HStack{
+                Text("Kelvin:")
+                TextField("Kelvin",text: $kelvin)
+            }
+            
+        }
     }
 }
 struct LenseEdit: View{
+    @Binding var lenses:[Lense]
+    @State var lense: Lense
+    @State var tint: String
+    @State var kelvin: String
+    @Environment(\.presentationMode) var presentationMode
     var body: some View{
-        Text("LenseEdit")
+        VStack{
+            HStack{
+                Text("Tint:")
+                TextField("tint",text: $tint)
+            }
+            HStack{
+                Text("Kelvin:")
+                TextField("Kelvin",text: $kelvin)
+            }
+        }
     }
 }
 struct FilterEdit: View{
+    @Binding var filters:[Filter]
+    @State var filter: Filter
+    @State var tint: String
+    @State var kelvin: String
+    @State var name: String = ""
+    @Environment(\.presentationMode) var presentationMode
     var body: some View{
-        Text("FilterEdit")
+        VStack{
+            HStack{
+                Text("Tint:")
+                TextField("tint",text: $tint)
+            }
+            HStack{
+                Text("Kelvin:")
+                TextField("Kelvin",text: $kelvin)
+            }
+        }.navigationTitle("Edit Filter")
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(leading:  Button("Cancel"){
+                presentationMode.wrappedValue.dismiss()
+            }, trailing: Button("Save"){
+                guard let kelvinInt: Int = Int(kelvin) else {
+                    print("Not a number")
+                    return
+                }
+                guard let tintInt: Int = Int(tint) else {
+                    print("Not a number")
+                    return
+                }
+                guard let idx = filters.firstIndex(where: { $0.filterId == filter.filterId })
+                else{
+                    return
+                }
+                filters[idx] = Filter(filterId: filter.filterId, name: name, kelvin: kelvinInt, tint: tintInt)
+                presentationMode.wrappedValue.dismiss()
+            })
+        
+    }
+}
+struct FilterAdd: View{
+    @Binding var filters:[Filter]
+    @State var tint: String = "0"
+    @State var kelvin: String = "0"
+    @State var name: String = ""
+    @Environment(\.presentationMode) var presentationMode
+    var body: some View{
+        VStack{
+            HStack{
+                Text("Tint:")
+                TextField("tint",text: $tint)
+            }
+            HStack{
+                Text("Kelvin:")
+                TextField("Kelvin",text: $kelvin)
+            }
+        }.navigationTitle("Add Filter")
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(leading:  Button("Cancel"){
+                presentationMode.wrappedValue.dismiss()
+            }, trailing: Button("Save"){
+                guard let kelvinInt: Int = Int(kelvin) else {
+                    print("Not a number")
+                    return
+                }
+                guard let tintInt: Int = Int(tint) else {
+                    print("Not a number")
+                    return
+                }
+                filters.append(Filter(filterId: 0, name: name, kelvin: kelvinInt, tint: tintInt))
+                presentationMode.wrappedValue.dismiss()
+            })
     }
 }
 
